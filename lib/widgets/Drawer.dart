@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:temp/screens/SignIn_Screen.dart';
 import 'package:temp/screens/Signup_Screen.dart';
@@ -60,12 +61,10 @@ class _DrawerExState extends State<DrawerEx> {
       tileColor: Colors.amber[200],
       onTap: () {
         Navigator.of(context).pop();
-        // showDialog(
-        //     context: context,
-        //     builder: (ctx) {
-        //       return widget;
-        //     });
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>widget),ModalRoute.withName("/SignIn"));
+        if(widget is SignIn){
+          FirebaseAuth.instance.signOut();
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>widget),ModalRoute.withName("/SignIn"));
+        }
       },
     );
   }

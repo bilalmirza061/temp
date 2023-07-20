@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:temp/controllers/GoogleSignInController.dart';
+import 'package:temp/extras/functions.dart';
 import 'package:temp/screens/Signup_Screen.dart';
 
 import '../widgets/BottomNavBar.dart';
@@ -21,9 +23,9 @@ class _SignInState extends State<SignIn> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sign in"),
@@ -43,7 +45,9 @@ class _SignInState extends State<SignIn> {
                   labelText: "Enter Email",
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               TextFormField(
                 obscureText: true,
                 controller: _passwordController,
@@ -53,39 +57,60 @@ class _SignInState extends State<SignIn> {
                   labelText: "Enter Password",
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    if(_formKey.currentState!.validate()){
-                       _signInWithEmail(context);
-
+                    if (_formKey.currentState!.validate()) {
+                      _signInWithEmail(context);
                     }
                   },
                   child: const Text("SIGN IN"),
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  icon: const FaIcon(FontAwesomeIcons.google, color: Colors.red),
-                  onPressed: (){
-                    print("Hello");
-                    },
-                    label: const Text("Sign In With Google"),
+                  icon:
+                      const FaIcon(FontAwesomeIcons.google, color: Colors.red),
+                  onPressed: () async {
+                    final provider = Provider.of<GoogleSignInController>(
+                        context,
+                        listen: false);
+                    Functions.showLoaderDialog(context);
+                    await provider.googleLogin();
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => const BottomNavBarEx()));
+                  },
+                  label: const Text("Sign In With Google"),
                 ),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               const Text('Don\'t have any account?'),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
-                width: double.maxFinite/2,
+                width: double.maxFinite / 2,
                 child: TextButton.icon(
                   icon: const Icon(Icons.login),
                   onPressed: () {
-                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>const SignUpPage()), ModalRoute.withName("/Home"));
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => const SignUpPage()),
+                        ModalRoute.withName("/Home"));
                   },
                   label: const Text("SIGN UP"),
                 ),
@@ -100,13 +125,16 @@ class _SignInState extends State<SignIn> {
               TextButton.icon(
                 label: const Text("Sign In With Phone"),
                 icon: const Icon(Icons.login_rounded),
-                onPressed: (){
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>const SignInPhone()), ModalRoute.withName("/Home"));
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => const SignInPhone()),
+                      ModalRoute.withName("/Home"));
                 },
               ),
             ],
           ),
-
         ),
       ),
     );
@@ -114,7 +142,7 @@ class _SignInState extends State<SignIn> {
 
   Future<void> _signInWithEmail(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      showDialog(context: context, builder: (builder)=> const Loading());
+      showDialog(context: context, builder: (builder) => const Loading());
       try {
         UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
@@ -123,19 +151,19 @@ class _SignInState extends State<SignIn> {
         // Navigate to the next screen after successful sign-in
         // For example, Navigator.pushReplacementNamed(context, '/home');
         Navigator.pop(context);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder)=>const BottomNavBarEx()));
-      }on FirebaseAuthException  catch (e) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (builder) => const BottomNavBarEx()));
+      } on FirebaseAuthException catch (e) {
         Navigator.pop(context);
         print(e.code);
         print('Sign in failed. Error: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Sign in failed. Please check your email and password.'),
+            content:
+                Text('Sign in failed. Please check your email and password.'),
           ),
         );
       }
-
-
     }
   }
 }

@@ -1,13 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/ImagePageContent.dart';
 import '../screens/MainPageContent.dart';
 import '../screens/Rows.dart';
+import '../screens/SignIn_Screen.dart';
 import 'Calender.dart';
+import 'Dialog.dart';
 import 'Drawer.dart';
 import 'DropDownButton.dart';
 import 'GestureDetectorEx.dart';
 import 'ChartEx.dart';
+import 'LoaderDialog.dart';
 
 class BottomNavBarEx extends StatefulWidget{
   const BottomNavBarEx({Key? key}) : super(key: key);
@@ -65,7 +69,20 @@ class _BottomNavBar extends State<BottomNavBarEx> {
         ],
       ),
       drawer: const DrawerEx(),
-      body: screens[currentIndex],
+      body: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if(snapshot.connectionState == ConnectionState.waiting){
+              return const Loading();
+            }else if(snapshot.hasData){
+               return screens[currentIndex];
+            }else if(snapshot.hasError){
+              return const DialogWidget(title: "Sign In With Google",msg: "ERROR!\nSomething went wrong!");
+            }else{
+              return const SignIn();
+            }
+          },
+          ),
       bottomNavigationBar: Theme(
         data: ThemeData(
           canvasColor: colors[currentIndex],
