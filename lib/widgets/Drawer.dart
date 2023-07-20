@@ -62,6 +62,7 @@ class _DrawerExState extends State<DrawerEx> {
       onTap: () {
         Navigator.of(context).pop();
         if(widget is SignIn){
+
           FirebaseAuth.instance.signOut();
           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>widget),ModalRoute.withName("/SignIn"));
         }
