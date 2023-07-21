@@ -2,13 +2,15 @@
 
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 
 class GoogleSignInController extends ChangeNotifier{
   final googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _user;
   GoogleSignInAccount get user => _user!;
+
 
   Future googleLogin() async{
     final googleUser = await googleSignIn.signIn();
@@ -26,14 +28,17 @@ class GoogleSignInController extends ChangeNotifier{
 
     await FirebaseAuth.instance.signInWithCredential(credential);
 
-
-
-
-
     print("here2");
 
-
     notifyListeners();
+  }
+
+  Future logout() async{
+    try {
+      googleSignIn.currentUser?.clearAuthCache();
+      googleSignIn.signOut();
+      user.clearAuthCache();
+    }catch(ex){}
   }
 
 }

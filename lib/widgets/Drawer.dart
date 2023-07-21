@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:temp/controllers/GoogleSignInController.dart';
 import 'package:temp/screens/SignIn_Screen.dart';
 import 'package:temp/screens/Signup_Screen.dart';
 
@@ -59,12 +62,17 @@ class _DrawerExState extends State<DrawerEx> {
       leading: Icon(icon),
       title: Text(title),
       tileColor: Colors.amber[200],
-      onTap: () {
+      onTap: () async {
         Navigator.of(context).pop();
         if(widget is SignIn){
 
-          FirebaseAuth.instance.signOut();
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>widget),ModalRoute.withName("/SignIn"));
+          final provider = Provider.of<GoogleSignInController>(
+              context,
+              listen: false);
+          await provider.logout();
+          await FirebaseAuth.instance.signOut();
+         // Navigator.push(context, MaterialPageRoute(builder: (ctx)=> SignIn()));
+           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (builder)=>widget),ModalRoute.withName("/SignIn"));
         }
       },
     );

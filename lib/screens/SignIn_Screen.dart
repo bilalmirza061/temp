@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:temp/controllers/AppleSingInController.dart';
 import 'package:temp/controllers/GoogleSignInController.dart';
 import 'package:temp/extras/functions.dart';
 import 'package:temp/screens/Signup_Screen.dart';
@@ -30,110 +32,135 @@ class _SignInState extends State<SignIn> {
       appBar: AppBar(
         title: const Text("Sign in"),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(15),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.email),
-                  hintText: "Enter Email",
-                  labelText: "Enter Email",
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.email),
+                    hintText: "Enter Email",
+                    labelText: "Enter Email",
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                obscureText: true,
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.password),
-                  hintText: "Enter Password",
-                  labelText: "Enter Password",
+                const SizedBox(
+                  height: 20,
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _signInWithEmail(context);
-                    }
-                  },
-                  child: const Text("SIGN IN"),
+                TextFormField(
+                  obscureText: true,
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.password),
+                    hintText: "Enter Password",
+                    labelText: "Enter Password",
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon:
-                      const FaIcon(FontAwesomeIcons.google, color: Colors.red),
-                  onPressed: () async {
-                    final provider = Provider.of<GoogleSignInController>(
-                        context,
-                        listen: false);
-                    Functions.showLoaderDialog(context);
-                    await provider.googleLogin();
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (builder) => const BottomNavBarEx()));
-                  },
-                  label: const Text("Sign In With Google"),
+                const SizedBox(
+                  height: 20,
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Text('Don\'t have any account?'),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: double.maxFinite / 2,
-                child: TextButton.icon(
-                  icon: const Icon(Icons.login),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _signInWithEmail(context);
+                      }
+                    },
+                    child: const Text("SIGN IN", style: TextStyle(fontSize: 18)),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon:
+                        const FaIcon(FontAwesomeIcons.google, color: Colors.red),
+                    onPressed: () async {
+                      final provider = Provider.of<GoogleSignInController>(
+                          context,
+                          listen: false);
+                      Functions.showLoaderDialog(context);
+                      await provider.googleLogin();
+                      Navigator.pop(context);
+                      try{
+                        if(provider.user!=null){
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) => const BottomNavBarEx()));
+                        }
+                      }catch(ex){}
+
+                    },
+                    label: const Text("Sign In With Google", style: TextStyle(fontSize: 18)),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const FaIcon(FontAwesomeIcons.apple, color: Colors.black, size: 25,),
+                    onPressed: () async {
+                      await AppleSignInController().signInWithApple();
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => const BottomNavBarEx()));
+                    },
+                    label: const Text("Sign In With Apple", style: TextStyle(fontSize: 18),),
+                  )
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text('Don\'t have any account?', style: TextStyle(fontSize: 18)),
+                const SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: double.maxFinite / 2,
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.login),
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => const SignUpPage()),
+                          ModalRoute.withName("/Home"));
+                    },
+                    label: const Text("SIGN UP", style: TextStyle(fontSize: 18)),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text("Alternate method", style: TextStyle(fontSize: 18)),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextButton.icon(
+                  label: const Text("Sign In With Phone", style: TextStyle(fontSize: 18)),
+                  icon: const Icon(Icons.phone_android),
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (builder) => const SignUpPage()),
+                            builder: (builder) => const SignInPhone()),
                         ModalRoute.withName("/Home"));
                   },
-                  label: const Text("SIGN UP"),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Text("Alternate method"),
-              const SizedBox(
-                height: 20,
-              ),
-              TextButton.icon(
-                label: const Text("Sign In With Phone"),
-                icon: const Icon(Icons.login_rounded),
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => const SignInPhone()),
-                      ModalRoute.withName("/Home"));
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
