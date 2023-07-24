@@ -83,20 +83,10 @@ class _SignInState extends State<SignIn> {
                     icon:
                         const FaIcon(FontAwesomeIcons.google, color: Colors.red),
                     onPressed: () async {
-                      final provider = Provider.of<GoogleSignInController>(
-                          context,
-                          listen: false);
+
                       Functions.showLoaderDialog(context);
-                      await provider.googleLogin();
-                      Navigator.pop(context);
-                      try{
-                        if(provider.user!=null){
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) => const BottomNavBarEx()));
-                        }
-                      }catch(ex){}
+                      await googleLogin();
+
 
                     },
                     label: const Text("Sign In With Google", style: TextStyle(fontSize: 18)),
@@ -192,5 +182,28 @@ class _SignInState extends State<SignIn> {
         );
       }
     }
+  }
+
+  Future googleLogin() async{
+    try{
+      final googleUser = await GoogleSignIn().signIn();
+      if(googleUser == null){
+        Navigator.of(context).pop();
+        return;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(
+          builder: (builder) => const BottomNavBarEx()), (route) => false);
+
+    }on FirebaseAuthException catch(e){
+      print(e);
+    }
+
   }
 }
